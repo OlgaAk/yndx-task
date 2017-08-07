@@ -13,7 +13,7 @@ function handleForm(event) {
 } 
 form.addEventListener('submit', handleForm);
 
-//создаем объект(конструктор) для работы с формой
+//создаем прототип объекта для работы с формой
 function myForm(fio, email, phone) { // при создании новой формы передаем значения полей
 	this.fio = fio,
 	this.email = email,
@@ -24,20 +24,18 @@ function myForm(fio, email, phone) { // при создании новой фо�
 	this.phone_pattern = RegExp
 };
 
-// добавляем к конструктору формы метод для валидации поля формы. ей передается регулярное выражение и поле
-//при успешной валидации возвращаем тру, при неуспешной - добавляем в массив с ошибочными полями данное поле и 
+// добавляем к прототипу объекта формы метод для валидации поля формы. ей передается регулярное выражение, и 
+// при неуспешной  валидации добавляем в массив с ошибочными полями данное поле и 
 // ставим ему класс еррор
 myForm.prototype.testinput = function(re, field){
 	console.log(re, field)
-   if (re.test(field.value)) {
-	   return true
-   } else {
+   if (!re.test(field.value)) {
 	   console.log('field test failed')
 	   this.error_fields.push(field);
 	   field.classList.add("error");		
    }
 }
-// добавляем к конструктору формы метод для валидации телефона (сумма чисел < 30), она принимает поле
+// добавляем к прототипу объекта формы метод для валидации телефона (сумма чисел < 30), она принимает поле
 myForm.prototype.check_sum = function(field){
 	if (this.testinput(this.phone_pattern, field_phone)) {
 		var field_value = field.value;
@@ -54,26 +52,23 @@ myForm.prototype.check_sum = function(field){
 		} 	else {return true}
 	} else {return false}
 }
-// добавляем к конструктору формы метод для  общей валидации формы, исходя из результата валидации полей
+// добавляем к прототипу объекта формы метод для  общей валидации формы, исходя из результата валидации полей
 myForm.prototype.validate = function()  {
 	this.testinput(this.fio_pattern, field_fio);
 	this.testinput(this.email_pattern, field_mail);
 	this.check_sum(field_phone);
 	console.log(this.error_fields);	
 	if (this.error_fields.length !== 0){ // проверяем, все ли поля заполнены правильно
-		var i = 0;
 		var error_fields_names = [] // создаем новый массив для передачи туда названий неправильно заполненных полей полей
-		while (i < this.error_fields.length) { // перебираем все неправильно заполненные поля
-		error_fields_names.push(this.error_fields[i].getAttribute('name'))
-		i++
+		for (var i = 0; i < this.error_fields.length; i++) { // перебираем все неправильно заполненные поля
+		error_fields_names.push(this.error_fields[i].getAttribute('name'));
 		} 			
 		alert('Поле заполнено неправильно:' + error_fields_names.join() +'!');
-		return false
-		
+		return false		
 	} else { return true} 
 }
  
- // добавляем к конструктору формы метод,который собирает значения полей в объект и делает из него джейсон для передачи на сервер
+ // добавляем к прототипу объекта формы метод,который собирает значения полей в объект и делает из него джейсон для передачи на сервер
  myForm.prototype.getData = function() {
 	var formData = {
 	fio: this.fio,
@@ -84,7 +79,7 @@ myForm.prototype.validate = function()  {
 	return newFormToJson
  }
 
-// добавляем к конструктору формы метод,который принимает объект с данными како-то формы и вставлять ее в ДОМ
+// добавляем к прототипу объекта формы метод,который принимает объект с данными како-то формы и вставлять ее в ДОМ
 myForm.prototype.setData = function(someForm){
 	field_fio.value = someForm["email"],
 	field_mail.value = someForm["phone"],
@@ -92,10 +87,9 @@ myForm.prototype.setData = function(someForm){
 }
 var someForm = new myForm(0,0,0) // какая-то форма для теста
 
-// добавляем к конструктору формы метод, который делает аякс запрос на сервер
+// добавляем к прототипу объекта формы метод, который делает аякс запрос на сервер
 	myForm.prototype.submit = function(){
-		console.log(this.validate());
-		if(this.validate()) {
+			if(this.validate()) {
 	        button.disabled = true; 
 			console.log('validation successfull')	
 			newFormToJson = this.getData(); // получаем джейсон с данными формы
@@ -115,10 +109,12 @@ var someForm = new myForm(0,0,0) // какая-то форма для теста
 			 	document.querySelector('#resultContainer').innerHTML = data.reason;				
 			  });
 
-			//  ajaxGet('progress.json', function(data){
-			// 	document.querySelector('#resultContainer').classList.add('progress');
-			// 	setTimeout(___, 1000);
-			//  });
+			  ajaxGet('progress.json', function(data){
+				document.querySelector('#resultContainer').classList.add('progress');
+			 	setTimeout(function(){
+					 ajaxGet(url)
+				}, 1000);
+			  });
 	} }
 
 	// при нажатии на кнопку создается новый объект формы, и у нее запускается функция сабмит
@@ -145,6 +141,6 @@ function ajaxGet(url, params, callback){
 	request.setRequestHeader('Content-Type', 'application/json'); //x-www-form-urlencoded
 	request.responseType = 'json';
 	request.send(params);
-	console.log(param)
+	console.log(params)
 }
 }

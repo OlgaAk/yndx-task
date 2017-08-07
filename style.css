@@ -2,6 +2,14 @@
 .error {
 	border: 1px solid red
 }
+
+.success {
+	border: 1px solid green;
+    background-color: darkseagreen;
+    color: white;
+    text-align: center
+
+}
  
  input:invalid {
     border: 1px solid red
