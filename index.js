@@ -108,7 +108,7 @@ select_random_json = function() {
 			var random_json = select_random_json();
 			console.log(random_json);
 			var that = this; // чтобы не потерять контекст дальше
-			ajaxGet(random_json, newFormToJson, function(data){		// сервер обращается к джейсону 	
+			ajaxGet(random_json, newFormToJson, function(data){		//  обращаемся к джейсону 	
 				if (data.status === 'progress') {   // если попался джейсон прогресс, берем из него таймаут и запускаем функцию сабнит заново
 					setTimeout(function() {
 						that.submit()
@@ -148,9 +148,6 @@ function ajaxGet(url, params, callback){
 	request.responseType = 'json';
 	request.send(params);
 	console.log(params)
-	
-	
-	
 }
 
 module.exports = myForm;
