@@ -1,4 +1,3 @@
-window.onload = function () {
 
 // создаем переменные для работы с ДОМ-деревом (анкетой)
 var field_phone = document.getElementById("phone")
@@ -92,6 +91,13 @@ myForm.prototype.setData = function(someForm){
 }
 var someForm = new myForm(0,0,0) // какая-то форма для теста
 
+var json_array = ['success.json', 'error.json', 'progress.json'];  // создаем массив с возможными json-файлами, чтобы потом выбирать случайный
+
+select_random_json = function() {   
+	var random_json = json_array[Math.floor(Math.random() * json_array.length)]; // случайный json-файл 
+	return random_json
+}
+
 // добавляем к прототипу объекта формы метод, который делает аякс запрос на сервер
 	myForm.prototype.submit = function(){
 			this.validate();
@@ -99,30 +105,24 @@ var someForm = new myForm(0,0,0) // какая-то форма для теста
 	        button.disabled = true; 
 			console.log('validation successfull')	
 			newFormToJson = this.getData(); // получаем джейсон с данными формы
-			 ajaxGet('success.json', newFormToJson, function(data){		// сервер обращается к джейсону сексес и ему передаются данные формы	
-				//response = JSON.parse(data);
-				document.querySelector('#resultContainer').classList.add('success');
+			var random_json = select_random_json();
+			console.log(random_json);
+			var that = this; // чтобы не потерять контекст дальше
+			ajaxGet(random_json, newFormToJson, function(data){		// сервер обращается к джейсону 	
+				if (data.status === 'progress') {   // если попался джейсон прогресс, берем из него таймаут и запускаем функцию сабнит заново
+					setTimeout(function() {
+						that.submit()
+					}, data.timeout)
+				}
+				document.querySelector('#resultContainer').classList.add(data.status);
 				document.querySelector('#resultContainer').innerHTML = data.status;	
 				console.log(myForm)		
 				form.style.display= 'none';		//прячем форму		
-				console.log(this)	
-			 });
-			} else { 	// при неуспешной валидации обращение идет к джейсону еррор
-			  console.log('error.json should open')
-			  	  ajaxGet('error.json', 0, function(data){
-			 	 //response = JSON.parse(data);			 
-			 	document.querySelector('#resultContainer').classList.add('error');
-			 	document.querySelector('#resultContainer').innerHTML = data.reason;				
-			  });
-
-			  //ajaxGet('progress.json', function(data){
-			//	document.querySelector('#resultContainer').classList.add('progress');
-			 //	setTimeout(function(){
-			//		 ajaxGet(url)
-			//	}, data.Number);
-			//  });
-	} }
-
+				console.log(this, that);								
+			})
+		} 
+	}
+	
 	// при нажатии на кнопку создается новый объект формы, и у нее запускается функция сабмит
 	button.onclick = function(){
 		var newForm = new myForm(field_fio.value, field_mail.value, field_phone.value);
@@ -143,10 +143,14 @@ function ajaxGet(url, params, callback){
 			f(request.response)
 		}
 	} 
-	request.open('POST', url);
+	request.open('GET', url);
 	request.setRequestHeader('Content-Type', 'application/json'); //x-www-form-urlencoded
 	request.responseType = 'json';
 	request.send(params);
 	console.log(params)
+	
+	
+	
 }
-}
+
+module.exports = myForm;
