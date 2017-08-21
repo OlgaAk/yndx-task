@@ -150,4 +150,4 @@ function ajaxGet(url, params, callback){
 	console.log(params)
 }
 
-module.exports = myForm;
+// module.exports = myForm;
